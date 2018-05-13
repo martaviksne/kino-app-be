@@ -50,7 +50,7 @@ app.get('/', function(req, res){
 app.use('/api', require('./routes/api'));
 app.use('/posters', express.static(__dirname + '/posters'));
 
-app.post('/register', function(req, res) {
+app.post('/api/register', function(req, res) {
   var username = req.body.username,
   password = req.body.password;
   var newUser = new User();
@@ -89,7 +89,7 @@ app.post("/api/upload", function(req, res) {
      });
  });
 
-app.post('/authenticate', function(req, res) {
+app.post('/api/authenticate', function(req, res) {
   var username = req.body.username,
   password = req.body.password;
   User.findOne({ 'username': username }, 'username password', function(err, foundUser) {
@@ -105,7 +105,7 @@ app.post('/authenticate', function(req, res) {
   });
 });
 
-app.post('/verifyToken', verifyToken, (req, res) => {
+app.post('/api/verifyToken', verifyToken, (req, res) => {
   jwt.verify(req.token, secretKey, (err, authData) => {
     if(err) {
       res.sendStatus(403);
@@ -115,7 +115,7 @@ app.post('/verifyToken', verifyToken, (req, res) => {
   });
 });
 
-app.post('/removeUpload', function(req, res){
+app.post('/api/removeUpload', function(req, res){
   let theFile = req.body.theFile;
   if (fs.existsSync(theFile)) {
     fs.unlink(req.body.theFile,function(err){
