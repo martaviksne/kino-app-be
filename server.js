@@ -13,6 +13,7 @@ const multer = require('multer');
 const sharp = require('sharp');
 const fs = require('fs');
 const crypto = require('crypto');
+const webPush = require('web-push');
 
 const storage = multer.diskStorage({
   destination: function(req, file, callback) {
@@ -25,6 +26,17 @@ const storage = multer.diskStorage({
     })
   }
 });
+
+process.env.VAPID_PUBLIC_KEY = "BL39yyiLpdRhxzvpZYUs7y3XvG887wS2PFjXuw1Q1xOuDcywDWzN3RRYWHr6oeNpqotL9zIVjczC2W3ZcnOScgo";
+process.env.VAPID_PRIVATE_KEY = "f0vbQITRUim8WXwHfWgovmYL738qyMDkBy8_IMoMK0I";
+
+// Set the keys used for encrypting the push messages.
+webPush.setVapidDetails(
+  'https://kino.linnuu.com',
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
+
 
 function doSomething() {
   console.log('do something');
@@ -146,6 +158,25 @@ function verifyToken(req, res, next) {
     res.sendStatus(403);
   }
 }
+
+app.post('/api/sendNotification', function(req, res) {
+    const subscription = req.body.subscription;
+    const payload = req.body.payload;
+    const options = {
+      TTL: req.body.ttl
+    };
+
+    setTimeout(function() {
+      webPush.sendNotification(subscription, payload, options)
+      .then(function() {
+        res.sendStatus(201);
+      })
+      .catch(function(error) {
+        console.log(error);
+        res.sendStatus(500);
+      });
+    }, req.body.delay);
+  });
 
 // Servera inicializācija
 app.listen(port);
