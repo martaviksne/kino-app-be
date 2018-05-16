@@ -6,6 +6,7 @@ const port = 9000;
 const path = require("path");
 const User = require('./models/user');
 const Filma = require('./models/filmas');
+const Ticket = require('./models/ticket');
 const jwt = require('jsonwebtoken');
 var cors = require('cors');
 const secretKey = 'kinoteatris';
@@ -116,6 +117,18 @@ app.post('/api/authenticate', function(req, res) {
     }
   });
 });
+
+app.get('/api/get-ticket/:id', function(req, res) {
+  let code = req.params.id;
+  Ticket.findOne({ 'theId': code }, function(err, foundTicket) {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      res.send(foundTicket);
+      console.log(foundTicket);
+    }
+  })
+})
 
 app.post('/api/verifyToken', verifyToken, (req, res) => {
   jwt.verify(req.token, secretKey, (err, authData) => {
