@@ -7,6 +7,7 @@ const path = require("path");
 const User = require('./models/user');
 const Filma = require('./models/filmas');
 const Ticket = require('./models/ticket');
+const Subscriber = require('./models/subscriber');
 const jwt = require('jsonwebtoken');
 var cors = require('cors');
 const secretKey = 'kinoteatris';
@@ -125,7 +126,6 @@ app.get('/api/get-ticket/:id', function(req, res) {
       res.sendStatus(403);
     } else {
       res.send(foundTicket);
-      console.log(foundTicket);
     }
   })
 })
@@ -173,12 +173,11 @@ function verifyToken(req, res, next) {
 }
 
 app.post('/api/sendNotification', function(req, res) {
-    const subscription = req.body.subscription;
+    const subscription = JSON.parse(req.body.subscription);
     const payload = req.body.payload;
     const options = {
       TTL: req.body.ttl
     };
-
     setTimeout(function() {
       webPush.sendNotification(subscription, payload, options)
       .then(function() {
@@ -186,10 +185,24 @@ app.post('/api/sendNotification', function(req, res) {
       })
       .catch(function(error) {
         console.log(error);
+        if (error.statusCode === 410) {
+          console.log('Delete subscription');
+          Subscriber.findOneAndRemove({ 'subscription': subscription })
+        }
         res.sendStatus(500);
       });
     }, req.body.delay);
   });
+
+app.post('/api/findSubscription', function(req, res) {
+  Subscriber.findOneAndRemove({ 'subscription': req.body.subscription }, function(err, foundSub) {
+    if (err) {
+      res.sendStatus(500);
+    } else {
+      res.sendStatus(200);
+    }
+  })
+})
 
 // Servera inicializācija
 app.listen(port);
