@@ -62,6 +62,7 @@ app.get('/', function(req, res){
   res.send('working');
 });
 app.use('/api', require('./routes/api'));
+app.use(express.static(__dirname + '/api', { maxage: '2628000' }));
 app.use('/posters', express.static(__dirname + '/posters'));
 
 app.post('/api/register', function(req, res) {
