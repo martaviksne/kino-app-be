@@ -16,6 +16,7 @@ const sharp = require('sharp');
 const fs = require('fs');
 const crypto = require('crypto');
 const webPush = require('web-push');
+const cacheControl = require('express-cache-controller');
 
 const storage = multer.diskStorage({
   destination: function(req, file, callback) {
@@ -56,13 +57,13 @@ var app = express();
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cacheControl({ maxAge: 31536000 }));
 
 // Saites
 app.get('/', function(req, res){
   res.send('working');
 });
 app.use('/api', require('./routes/api'));
-app.use(express.static(__dirname + '/api', { maxage: '2628000' }));
 app.use('/posters', express.static(__dirname + '/posters'));
 
 app.post('/api/register', function(req, res) {
